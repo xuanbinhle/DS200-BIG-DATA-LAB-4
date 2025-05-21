@@ -1,20 +1,23 @@
 import os
 import glob
 import pandas as pd
-from sklearn.preprocessing import LabelEncoder
 from sklearn.metrics import accuracy_score
 import joblib
 
 MODEL_DIR = "models"
-model_files = glob.glob(os.path.join(MODEL_DIR, "iris_rf_model_batch*.pkl"))
+MODEL_PATTERN = "iris_*_model_batch*.pkl" 
+TEST_DATA_PATH = "data/iris.data"
+
+model_files = glob.glob(os.path.join(MODEL_DIR, MODEL_PATTERN))
 
 if not model_files:
-    raise FileNotFoundError("No saved model found in 'models/' directory.")
+    print("No saved model found in 'models/' directory.")
+    print("Files in 'models/':", os.listdir("models"))
+    raise FileNotFoundError("No model matching pattern 'iris_*_model_batch*.pkl'")
 
 def extract_batch_number(path):
-    basename = os.path.basename(path)
-    num = basename.replace("iris_rf_model_batch", "").replace(".pkl", "")
-    return int(num)
+    name = os.path.basename(path)
+    return int(name.split("batch")[-1].split(".pkl")[0])
 
 model_files.sort(key=extract_batch_number)
 latest_model_path = model_files[-1]
@@ -22,12 +25,12 @@ latest_model_path = model_files[-1]
 print(f"Loading model: {latest_model_path}")
 model = joblib.load(latest_model_path)
 
-df = pd.read_csv("data/iris.data", header=None)
+df = pd.read_csv(TEST_DATA_PATH, header=None)
 df.columns = ['sepal_length', 'sepal_width', 'petal_length', 'petal_width', 'class']
 df.dropna(inplace=True)
 
-le = LabelEncoder()
-df['label'] = le.fit_transform(df['class'])
+label_map = {"Iris-setosa": 0, "Iris-versicolor": 1, "Iris-virginica": 2}
+df['label'] = df['class'].map(label_map)
 
 X = df[['sepal_length', 'sepal_width', 'petal_length', 'petal_width']]
 y = df['label']

@@ -1,7 +1,3 @@
-# Spark DL Streaming with Kafka + PyTorch
-
-This project streams the Iris dataset from a Kafka producer and consumes it with a PyTorch model trained in real-time via Spark Structured Streaming.
-
 ## How to Run
 
 1. Build Docker image:
@@ -27,11 +23,10 @@ This project streams the Iris dataset from a Kafka producer and consumes it with
 
 5. Run Consumer:
    ```bash
-   docker run --rm --network iris-net iris-streaming-app spark-submit consumer/iris_kafka_consumer.py
+   docker run --rm   --network iris-net   -v $(pwd):/app   -w /app   iris-streaming-app   spark-submit   --packages org.apache.spark:spark-sql-kafka-0-10_2.12:3.5.0,org.apache.kafka:kafka-clients:3.5.0   consumer/iris_kafka_consumer.py
    ```
 
 6. Evaluate model:
    ```bash
    docker run --rm -v $(pwd)/models:/app/models iris-streaming-app python model/test_model.py
    ```
-# DS200-BIG-DATA-LAB-4
